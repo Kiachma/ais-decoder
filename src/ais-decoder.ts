@@ -1,6 +1,6 @@
-import {Transform, TransformOptions} from 'stream';
+import { Transform, TransformOptions } from 'stream';
 
-import {DecodingError} from './errors';
+import { DecodingError } from './errors';
 import AisSentence from './ais-sentence';
 import AisBitField from './ais-bitfield';
 import AisMessage from './messages/ais-message';
@@ -28,7 +28,7 @@ class AisDecoder extends Transform {
     transformOptions?: TransformOptions
   ) {
     super(transformOptions);
-    this.options = {...defaultOptions, ...options};
+    this.options = { ...defaultOptions, ...options };
     this.setEncoding('utf8');
   }
 
@@ -58,12 +58,19 @@ class AisDecoder extends Transform {
   }
 
   handleMultiPartSentence(sentence: AisSentence): void {
+    const prev = this.multiPartBuffer[this.multiPartBuffer.length - 1]
+    if ((prev && prev.partNumber + 1 !== sentence.partNumber)
+      || !prev && sentence.partNumber > 1) {
+      console.log('Wrong order of part numbers prev');
+      return
+    }
     this.multiPartBuffer.push(sentence);
 
     if (sentence.isLastPart()) {
       if (this.multiPartBuffer.length !== sentence.numParts) {
         this.multiPartBuffer.length = 0;
-        throw new DecodingError('Incorrect multipart order', sentence.message);
+        throw new DecodingError('Incorrect multipart order',
+          `${prev}, ${sentence.message}`);
       }
 
       const payloads = this.multiPartBuffer.map(

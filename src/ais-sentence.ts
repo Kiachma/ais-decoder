@@ -1,4 +1,4 @@
-import {DecodingError} from './errors';
+import { DecodingError } from './errors';
 
 class AisSentence {
   message: string;
@@ -16,14 +16,17 @@ class AisSentence {
   constructor(message: string) {
     this.message = message;
 
-    const startIndex = this.message.indexOf('!');
+    let startIndex = this.message.indexOf('!');
 
     if (startIndex === -1) {
-      throw new DecodingError('Start not found', this.message);
+      startIndex = this.message.indexOf('$');
+      if (startIndex === -1) {
+        throw new DecodingError('Start not found', this.message);
+      }
     }
 
     const messageFields = this.message.split(',');
-    if (messageFields.length !== 7) {
+    if (messageFields.length !== 7 && messageFields.length !== 13) {
       throw new DecodingError('Invalid length', this.message);
     }
 
@@ -58,7 +61,6 @@ class AisSentence {
       .split('*')[0]
       .substr(1, this.message.length);
     let checksum = 0;
-
     for (let i = 0; i < checksumString.length; i++) {
       // eslint-disable-next-line no-bitwise
       checksum = checksum ^ checksumString.charCodeAt(i);
@@ -69,7 +71,6 @@ class AisSentence {
     if (checksumHex.length === 1) {
       checksumHex = `0${checksumHex}`;
     }
-
     if (checksumHex !== this.checksum) {
       throw new DecodingError('Invalid checksum', this.message);
     }
