@@ -1,4 +1,4 @@
-import { DecodingError } from './errors';
+import {DecodingError} from './errors';
 
 class AisSentence {
   message: string;
@@ -24,7 +24,7 @@ class AisSentence {
         throw new DecodingError('Start not found', this.message);
       }
     }
-
+    this.message = this.message.substring(startIndex);
     const messageFields = this.message.split(',');
     if (messageFields.length !== 7 && messageFields.length !== 13) {
       throw new DecodingError('Invalid length', this.message);
