@@ -1,14 +1,14 @@
-import { Transform, TransformOptions } from 'stream';
+import {Transform, TransformOptions} from 'stream';
 
-import { DecodingError } from './errors';
-import AisSentence from './ais-sentence';
 import AisBitField from './ais-bitfield';
+import AisSentence from './ais-sentence';
+import {DecodingError} from './errors';
 import AisMessage from './messages/ais-message';
 import AisMessage123 from './messages/ais-message-123';
-import AisMessage4 from './messages/ais-message-4';
-import AisMessage5 from './messages/ais-message-5';
 import AisMessage18 from './messages/ais-message-18';
 import AisMessage24 from './messages/ais-message-24';
+import AisMessage4 from './messages/ais-message-4';
+import AisMessage5 from './messages/ais-message-5';
 import AisMessage8 from './messages/ais-message-8';
 
 interface AisDecoderOptions {
@@ -28,7 +28,7 @@ class AisDecoder extends Transform {
     transformOptions?: TransformOptions
   ) {
     super(transformOptions);
-    this.options = { ...defaultOptions, ...options };
+    this.options = {...defaultOptions, ...options};
     this.setEncoding('utf8');
   }
 
@@ -58,19 +58,23 @@ class AisDecoder extends Transform {
   }
 
   handleMultiPartSentence(sentence: AisSentence): void {
-    const prev = this.multiPartBuffer[this.multiPartBuffer.length - 1]
-    if ((prev && prev.partNumber + 1 !== sentence.partNumber)
-      || !prev && sentence.partNumber > 1) {
-      console.log('Wrong order of part numbers prev');
-      return
+    const prev = this.multiPartBuffer[this.multiPartBuffer.length - 1];
+    if (
+      (prev && prev.partNumber + 1 !== sentence.partNumber) ||
+      (!prev && sentence.partNumber > 1)
+    ) {
+      console.log(`Wrong order of part numbers prev ${sentence.message}`);
+      return;
     }
     this.multiPartBuffer.push(sentence);
 
     if (sentence.isLastPart()) {
       if (this.multiPartBuffer.length !== sentence.numParts) {
         this.multiPartBuffer.length = 0;
-        throw new DecodingError('Incorrect multipart order',
-          `${prev}, ${sentence.message}`);
+        throw new DecodingError(
+          'Incorrect multipart order',
+          `${prev}, ${sentence.message}`
+        );
       }
 
       const payloads = this.multiPartBuffer.map(
