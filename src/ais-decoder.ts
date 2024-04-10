@@ -10,6 +10,7 @@ import AisMessage24 from './messages/ais-message-24';
 import AisMessage4 from './messages/ais-message-4';
 import AisMessage5 from './messages/ais-message-5';
 import AisMessage8 from './messages/ais-message-8';
+import AisMessage9 from './messages/ais-message-9';
 
 interface AisDecoderOptions {
   silent?: boolean;
@@ -115,6 +116,9 @@ class AisDecoder extends Transform {
         break;
       case 8:
         decodedMessage = new AisMessage8(messageType, channel, bitField);
+        break;
+      case 9:
+        decodedMessage = new AisMessage9(messageType, channel, bitField);
         break;
       case 18:
         decodedMessage = new AisMessage18(messageType, channel, bitField);
